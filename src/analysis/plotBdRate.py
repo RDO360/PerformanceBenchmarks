@@ -1,32 +1,30 @@
 import pandas
 from matplotlib import pyplot
 
-from bd_rate import bd_rate
+from bdRate import bdRate
+from common import codecs
 
 frame = pandas.read_parquet("data/bitrateVmafRockets.parquet")
 
-heights = {0, 320}
-codecs = {"h264_nvenc": "C0", "hevc_nvenc": "C1"}
-
 for height in frame.height.unique():
-    original = frame.query("codec == 'h264_nvenc' & effort == 'p1' & height == @height").groupby("cq", as_index=False).mean(numeric_only=True).sort_values("bitrate", ascending=True)
+    original = frame.query("codec == 'h264_nvenc' & preset == 'p1' & height == @height").groupby("cq", as_index=False).mean(numeric_only=True).sort_values("bitrate", ascending=True)
 
     pyplot.figure()
 
     for codec in frame.codec.unique():
-        efforts = []
+        presets = []
         bdRates = []
 
-        for effort in frame.effort.unique():
-            efforts.append(effort)
-            compared = frame.query("codec == @codec & effort == @effort & height == @height").groupby("cq", as_index=False).mean(numeric_only=True).sort_values("bitrate", ascending=True)
+        for preset in frame.preset.unique():
+            presets.append(preset)
+            compared = frame.query("codec == @codec & preset == @preset & height == @height").groupby("cq", as_index=False).mean(numeric_only=True).sort_values("bitrate", ascending=True)
 
-            bdRate = bd_rate(list(original.bitrate), list(original.psnr_mean), list(compared.bitrate), list(compared.psnr_mean))
-            bdRates.append(bdRate)
+            rate = bdRate(list(original.bitrate), list(original.psnr_mean), list(compared.bitrate), list(compared.psnr_mean))
+            bdRates.append(rate)
         
-        pyplot.scatter(x=efforts, y=bdRates, label=codec, facecolors="None", edgecolors=codecs[codec])
+        pyplot.scatter(x=presets, y=bdRates, label=codecs[codec]["niceName"], facecolors="None", edgecolors=codecs[codec]["color"])
         
-    pyplot.xlabel("Effort")
+    pyplot.xlabel("Préréglage")
     pyplot.ylabel("BD-rate (%)")
 
     pyplot.legend(title="Codec")
