@@ -53,57 +53,49 @@ foreach ($tile in $tiles)
                     Write-Output "Iteration $currentIteration out of $totalIterations"
                     Write-Output "Params : $tile, $codec, $preset, $cq, $height"
 
-                    $segmentsPath = Join-Path -Path $segmentDirectory -ChildPath "output_%d.mp4"
-                    $rawPath = Join-Path -Path $segmentDirectory -ChildPath "output_%d.y4m"
+                    # Create the raw segments
+                    $rawSegmentsPath = Join-Path -Path $segmentDirectory -ChildPath "output_%d.y4m"
 
-                    # Encode the segment and a raw segment that will be used to evaluate the VMAF
-                    if ($height -eq 0)
-                    {
-                        ffmpeg -loglevel error -vsync passthrough -hwaccel cuda -hwaccel_output_format cuda `
-                        -i $tile `
-                        -f segment -segment_time $segmentTime -reset_timestamps 1 $rawPath `
-                        -c:v $codec -cq $cq -b:v 0 -preset $preset -rc vbr -g $segmentGOP -f segment -segment_time $segmentTime -reset_timestamps 1 -movflags faststart $segmentsPath
-                    }
-                    else
-                    {
-                        ffmpeg -loglevel error -vsync passthrough -hwaccel cuda -hwaccel_output_format cuda `
-                        -i $tile -f segment -segment_time $segmentTime -reset_timestamps 1 `
-                        $rawPath -vf "hwupload,scale_cuda=-2:$heights" -c:v $codec -cq $cq -b:v 0 -preset $preset -rc vbr -g $segmentGOP -f segment -segment_time $segmentTime -reset_timestamps 1 -movflags faststart $segmentsPath
-                    }
+                    ffmpeg -loglevel error -vsync passthrough -hwaccel cuda -hwaccel_output_format cuda -i $tile -f segment -segment_time $segmentTime -reset_timestamps 1 $rawSegmentsPath
 
                     # Find the amount of segments (ignore segments that are less than $segmentTime by flooring the value)
                     $numSegments = [math]::floor($tileDuration / $segmentTime)
 
-                    # Get bitrate and VMAF of each segment
+                    # Encode the segment and get its bitrate and VMAF
                     for ($segment = 0; $segment -lt $numSegments; $segment++)
                     {
-                        Write-Output "Evaluating segment $segment out of $numSegments"
+                        Write-Output "Processing segment $segment out of $numSegments"
 
+                        $rawSegmentPath = Join-Path -Path $segmentDirectory -ChildPath "output_$segment.y4m"
                         $segmentPath = Join-Path -Path $segmentDirectory -ChildPath "output_$segment.mp4"
-                        $rawPath =  Join-Path -Path $segmentDirectory -ChildPath "output_$segment.y4m"
+
+                        # We cant use Join-Path, since libvmaf only accepts / as a path separator, even on Windows
+                        $vmafLogFile = "vmaf_tile_${tile}_segment_${segment}_codec_${codec}_preset_${preset}_cq_${cq}_height_${height}.json"
+                        $vmafLogPath = $vmafLogDirectory + "/" + $vmafLogFile
+
+                        # Encode the segment and get the VMAF
+                        if ($height -eq 0)
+                        {
+                            ffmpeg -loglevel error -vsync passthrough -hwaccel cuda -hwaccel_output_format cuda `
+                            -i $rawSegmentPath -c:v $codec -cq $cq -b:v 0 -preset $preset -rc vbr -g $segmentGOP -movflags faststart $segmentPath
+
+                            ffmpeg -loglevel error -i $segmentPath -i $rawSegmentPath -filter_complex "libvmaf=feature=name=psnr:phone_model=1:n_threads=8:log_path=$vmafLogPath\:log_fmt=json" -f null -
+                        }
+                        else
+                        {
+                            ffmpeg -loglevel error -vsync passthrough -hwaccel cuda -hwaccel_output_format cuda `
+                            -i $rawSegmentPath -vf "hwupload,scale_cuda=-2:$heights" -c:v $codec -cq $cq -b:v 0 -preset $preset -rc vbr -g $segmentGOP -movflags faststart $segmentPath
+
+                            ffmpeg -loglevel error -i $segmentPath -i $rawSegmentPath -filter_complex "[0]scale=${tileWidth}x${tileHeight},libvmaf=feature=name=psnr:phone_model=1:n_threads=8:log_path=$vmafLogPath\:log_fmt=json" -f null -
+                        }
+
+                        # Get the mean VMAF
+                        $vmaf = Get-Content -Raw $vmafLogPath | ConvertFrom-Json
+                        $vmafMean = $vmaf.pooled_metrics.vmaf.mean
 
                         # Get bitrate
                         $probe = ffprobe -select_streams v -show_entries stream=bit_rate -print_format json -loglevel warning -i $segmentPath | ConvertFrom-Json
                         $bitrate = $probe.streams[0].bit_rate
-
-                        # Get VMAF
-                        # We cant use Join-Path, since libvmaf only accepts / as a path separator, even on Windows
-                        $logFile = "vmaf_tile_${tile}_segment_${segment}_codec_${codec}_preset_${preset}_cq_${cq}_height_${height}.json"
-                        $logPath = $vmafLogDirectory + "/" + $logFile
-
-                        # Calculate the VMAF by comparing the compressed segment with the raw segment
-                        if ($height -eq 0)
-                        {
-                            ffmpeg -loglevel error -i $segmentPath -i $rawPath -filter_complex "libvmaf=feature=name=psnr:phone_model=1:n_threads=8:log_path=$logPath\:log_fmt=json" -f null -
-                        }
-                        else
-                        {
-                            ffmpeg -loglevel error -i $segmentPath -i $rawPath -filter_complex "[0]scale=${tileWidth}x${tileHeight},libvmaf=feature=name=psnr:phone_model=1:n_threads=8:log_path=$logPath\:log_fmt=json" -f null -
-                        }
-
-                        # Get the mean VMAF
-                        $vmaf = Get-Content -Raw $logPath | ConvertFrom-Json
-                        $vmafMean = $vmaf.pooled_metrics.vmaf.mean
 
                         # Save the data to the data file
                         Write-Output "$tile,$codec,$preset,$cq,$height,$bitrate,$vmafMean,$logFile" >> $dataFile
