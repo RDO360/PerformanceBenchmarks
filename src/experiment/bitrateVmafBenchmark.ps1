@@ -29,7 +29,7 @@ $totalIterations = $tiles.Length * $codecs.Length * $presets.Length * $cqs.Lengt
 New-Item -ItemType Directory -Path $vmafLogDirectory | Out-Null
 
 # Save the header of the csv file. Data is added to the file and never overwritten
-Write-Output "tile,codec,preset,cq,height,bitrate,vmafMean,logFile" >> $dataFile
+Write-Output "tile,codec,preset,cq,height,bitrate,vmafMean,vmafLogFile" >> $dataFile
 
 foreach ($tile in $tiles)
 {
@@ -98,7 +98,7 @@ foreach ($tile in $tiles)
                         $bitrate = $probe.streams[0].bit_rate
 
                         # Save the data to the data file
-                        Write-Output "$tile,$codec,$preset,$cq,$height,$bitrate,$vmafMean,$logFile" >> $dataFile
+                        Write-Output "$tile,$codec,$preset,$cq,$height,$bitrate,$vmafMean,$vmafLogFile" >> $dataFile
                     }
 
                     # Delete the videos
