@@ -4,7 +4,7 @@ from matplotlib import pyplot
 from bdRate import bdRate
 from common import codecs
 
-frame = pandas.read_parquet("data/bitrateVmafRockets.parquet")
+frame = pandas.read_csv("data/rocketsBitrateVmaf.csv")
 
 for height in frame.height.unique():
     original = frame.query("codec == 'h264_nvenc' & preset == 'p1' & height == @height").groupby("cq", as_index=False).mean(numeric_only=True).sort_values("bitrate", ascending=True)
@@ -19,7 +19,7 @@ for height in frame.height.unique():
             presets.append(preset)
             compared = frame.query("codec == @codec & preset == @preset & height == @height").groupby("cq", as_index=False).mean(numeric_only=True).sort_values("bitrate", ascending=True)
 
-            rate = bdRate(list(original.bitrate), list(original.psnr_mean), list(compared.bitrate), list(compared.psnr_mean))
+            rate = bdRate(list(original.bitrate), list(original.vmafMean), list(compared.bitrate), list(compared.vmafMean))
             bdRates.append(rate)
         
         pyplot.scatter(x=presets, y=bdRates, label=codecs[codec]["niceName"], facecolors="None", edgecolors=codecs[codec]["color"])

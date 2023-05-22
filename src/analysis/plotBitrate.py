@@ -3,7 +3,7 @@ from matplotlib import pyplot
 
 from common import presets
 
-frame = pandas.read_parquet("data/bitrateVmafRockets.parquet")
+frame = pandas.read_csv("data/rocketsbitrateVmaf.csv")
 
 frame = frame.groupby(["codec", "preset", "cq", "height"], as_index=False).mean(numeric_only=True)
 
