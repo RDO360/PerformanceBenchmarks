@@ -25,9 +25,6 @@ param(
 $currentIteration = 1
 $totalIterations = $tiles.Length * $codecs.Length * $presets.Length * $cqs.Length * $heights.Length
 
-# Create the temporary directory where the segments will be saved
-New-Item -ItemType Directory -Path $segmentDirectory | Out-Null
-
 # Create the directory where the VMAF logs of the segments will be saved
 New-Item -ItemType Directory -Path $vmafLogDirectory | Out-Null
 
@@ -52,6 +49,9 @@ foreach ($tile in $tiles)
 				{
                     Write-Output "Iteration $currentIteration out of $totalIterations"
                     Write-Output "Params : $tile, $codec, $preset, $cq, $height"
+
+                    # Create the temporary directory where the segments will be saved
+                    New-Item -ItemType Directory -Path $segmentDirectory | Out-Null
 
                     # Create the raw segments
                     $rawSegmentsPath = Join-Path -Path $segmentDirectory -ChildPath "output_%d.y4m"
@@ -101,12 +101,12 @@ foreach ($tile in $tiles)
                         Write-Output "$tile,$codec,$preset,$cq,$height,$bitrate,$vmafMean,$logFile" >> $dataFile
                     }
 
+                    # Delete the videos
+                    Remove-Item $segmentDirectory -Recurse | Out-Null
+
                     $currentIteration += 1
 				}
 			}
 		}
 	}
 }
-
-# Delete the videos
-Remove-Item $segmentDirectory -Recurse | Out-Null
