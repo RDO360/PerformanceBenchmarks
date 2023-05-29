@@ -5,7 +5,7 @@ import numpy
 
 from common import presets
 
-frame = pandas.read_csv("data/rocketsbitrateVmaf.csv")
+frame = pandas.read_csv("data/rocketsBitrateVmaf.csv")
 
 frame = frame.groupby(["codec", "preset", "cq", "height"], as_index=False).mean(numeric_only=True)
 
@@ -43,5 +43,5 @@ for codec in frame.codec.unique():
 
             k += 1
         
-        pyplot.legend(title="Préréglage")
+        pyplot.legend(title="Préréglage", loc="lower left")
         pyplot.savefig(f"plots/vmaf_codec_{codec}_height_{height}.svg", bbox_inches="tight")

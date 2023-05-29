@@ -1,10 +1,10 @@
 codecs = {
     "h264_nvenc": {
-        "niceName": "H.264",
+        "niceName": "h264_nvenc",
         "color": "C0"
     },
     "hevc_nvenc": {
-        "niceName": "HEVC",
+        "niceName": "hevc_nvenc",
         "color": "C1"
     }
 }
