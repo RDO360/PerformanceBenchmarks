@@ -2,7 +2,7 @@
 
 ## Installation
 
-1. Install the latest [Python 3.10](https://www.python.org/downloads/) including `pip`
+1. Install the latest version of [Python 3.10](https://www.python.org/downloads/), including `pip`
 1. Install the required Python packages using `pip install -r requirements.txt`
 1. To execute the [experiments](#experiments), install [Powershell](https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell) on your operating system.
 1. To run the [Spatial and Temporal Information experiment](#spatial-and-temporal-information), install the requirements of the [siti-tools](https://github.com/VQEG/siti-tools#requirements).
