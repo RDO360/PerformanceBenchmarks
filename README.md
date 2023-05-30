@@ -1,8 +1,18 @@
 # Performance Benchmarks
 
-## Bitrate and VMAF benchmark
+## Spatial and Temporal Information
 
-This scripts benchmarks the bitrate and the VMAF of videos with differents encoding parameters. A description of the script parameters is available inside the script.
+This script calculates the spatial and temporal information of videos according to the [ITU-T P.910 (07/2022) recommendation](https://www.itu.int/rec/T-REC-P.910-202207-I/en) using the [reference software](https://github.com/VQEG/siti-tools). A description of the script parameters is available inside the script.
+
+### Example Usage
+
+```powershell
+siTi.ps1 -tiles "Rockets1.y4m", "Rockets2.y4m", "Rockets3.y4m", "Rockets4.y4m", "Rockets5.y4m", "Rockets6.y4m", "Rockets7.y4m", "Rockets8.y4m", "Rockets9.y4m", "Rockets10.y4m", "Rockets11.y4m", "Rockets12.y4m", "Rockets13.y4m", "Rockets14.y4m", "Rockets15.y4m", "Rockets16.y4m", "Rockets17.y4m", "Rockets18.y4m", "Rockets19.y4m", "Rockets20.y4m", "Rockets21.y4m", "Rockets22.y4m", "Rockets23.y4m", "Rockets24.y4m", "Rockets25.y4m", "Rockets26.y4m", "Rockets27.y4m", "Rockets28.y4m", "Rockets29.y4m", "Rockets30.y4m", "Rockets31.y4m", "Rockets32.y4m", "Rockets33.y4m", "Rockets34.y4m", "Rockets35.y4m", "Rockets36.y4m" -resultsDirectory siti
+```
+
+## Bitrate and VMAF Benchmark
+
+This script benchmarks the bitrate and the VMAF of videos with differents encoding parameters. A description of the script parameters is available inside the script.
 
 ### Example Usage
 
