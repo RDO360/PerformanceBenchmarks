@@ -1,5 +1,9 @@
-import pandas
 from matplotlib import pyplot
+import os
+import pandas
+
+# Create the directory where the plots will be saved
+os.makedirs("plots", exist_ok=True)
 
 frame = pandas.read_csv("data/rocketsSiTi.csv")
 

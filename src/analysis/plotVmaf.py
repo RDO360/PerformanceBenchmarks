@@ -1,9 +1,13 @@
-import pandas
-from matplotlib import pyplot
 import math
+from matplotlib import pyplot
 import numpy
+import os
+import pandas
 
 from common import presets
+
+# Create the directory where the plots will be saved
+os.makedirs("plots", exist_ok=True)
 
 frame = pandas.read_csv("data/rocketsBitrateVmaf.csv")
 

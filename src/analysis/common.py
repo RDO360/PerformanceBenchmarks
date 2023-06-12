@@ -1,10 +1,8 @@
 codecs = {
     "h264_nvenc": {
-        "niceName": "h264_nvenc",
         "color": "C0"
     },
     "hevc_nvenc": {
-        "niceName": "hevc_nvenc",
         "color": "C1"
     }
 }
@@ -33,7 +31,7 @@ presets = {
     }
 }
 
-tiles = {
+compareEncodingSpeed = {
     "Rockets1.y4m": {
         "marker": "+"
     },

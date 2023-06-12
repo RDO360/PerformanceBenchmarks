@@ -1,8 +1,12 @@
-import pandas
 from matplotlib import pyplot
+import os
+import pandas
 
 from bdRate import bdRate
 from common import codecs
+
+# Create the directory where the plots will be saved
+os.makedirs("plots", exist_ok=True)
 
 frame = pandas.read_csv("data/rocketsBitrateVmaf.csv")
 
@@ -22,7 +26,7 @@ for height in frame.height.unique():
             rate = bdRate(list(original.bitrate), list(original.vmafMean), list(compared.bitrate), list(compared.vmafMean))
             bdRates.append(rate)
         
-        pyplot.scatter(x=presets, y=bdRates, label=codecs[codec]["niceName"], facecolors="None", edgecolors=codecs[codec]["color"])
+        pyplot.scatter(x=presets, y=bdRates, label=codec, facecolors="None", edgecolors=codecs[codec]["color"])
         
     pyplot.xlabel("Préréglage")
     pyplot.ylabel("BD-rate (%)")

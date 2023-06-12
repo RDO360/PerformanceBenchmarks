@@ -1,8 +1,12 @@
-import pandas
 from matplotlib import pyplot
 from matplotlib.lines import Line2D
+import os
+import pandas
 
-from common import presets, tiles
+from common import presets, compareEncodingSpeed
+
+# Create the directory where the plots will be saved
+os.makedirs("plots", exist_ok=True)
 
 video_frames = 3632
 
@@ -26,12 +30,12 @@ for codec in frame.codec.unique():
         pyplot.figure()
 
         for preset in frame.preset.unique():
-            for tile in tiles:
+            for tile in compareEncodingSpeed:
                 series = frame.query("tile == @tile & codec == @codec & preset == @preset & height == @height")
                 x = series.cq
                 y = series.speed
                 
-                scatter = pyplot.scatter(x=x, y=y, label=preset, marker=tiles[tile]["marker"], c=presets[preset]["color"])
+                scatter = pyplot.scatter(x=x, y=y, label=preset, marker=compareEncodingSpeed[tile]["marker"], c=presets[preset]["color"])
 
         pyplot.xlabel("Facteur de qualité")
         pyplot.xticks(frame.cq.unique())
