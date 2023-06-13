@@ -9,7 +9,7 @@ os.makedirs("plots", exist_ok=True)
 
 video_frames = 3632
 
-frame = pandas.read_csv("data/encodingSpeedRockets.csv")
+frame = pandas.read_csv("data/rocketsEncodingSpeed.csv")
 
 frame = frame.groupby(["codec", "preset", "cq", "height"], as_index=False).mean(numeric_only=True)
 

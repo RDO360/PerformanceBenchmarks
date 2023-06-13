@@ -6,7 +6,7 @@ import pandas
 # Create the directory where the plots will be saved
 os.makedirs("plots", exist_ok=True)
 
-frame = pandas.read_csv("data/siTiTokyo.csv")
+frame = pandas.read_csv("data/rocketsSiTi.csv")
 frame = frame.groupby("input_file", as_index=False).mean(numeric_only=True)
 
 pyplot.figure()
