@@ -16,7 +16,9 @@ param(
 	# Inserts a key frame every $segmentGOP frames
 	[Parameter(Mandatory=$true)][int] $segmentGOP,
 	# The directory to save the temporary segments
-	[Parameter(Mandatory=$true)][String] $segmentDirectory
+	[Parameter(Mandatory=$true)][String] $segmentDirectory,
+	# The csv file where the data will be saved to
+	[Parameter(Mandatory=$true)][String] $dataFile
 )
 
 # Calculate the number of encodings that will be done
