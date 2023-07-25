@@ -49,7 +49,7 @@ This script benchmarks the time needed to encode videos in parallel with the sam
 #### Example Usage
 
 ```powershell
-parallelSessionsBenchmark.ps1 -tiles "Rockets16.y4m", "Rockets1.y4m", "Rockets11.y4m", "Rockets36.y4m", "Rockets18.y4m" -sessions 5 -codec "hevc_nvenc" -preset "p4" -cq 24 -height 0 -repetitions 5 -segmentTime 2 -segmentGOP 60 -segmentDirectory "segments"
+parallelSessionsBenchmark.ps1 -tiles "Rockets16.y4m", "Rockets1.y4m", "Rockets11.y4m", "Rockets36.y4m", "Rockets18.y4m" -sessions 5 -codec "hevc_nvenc" -preset "p4" -cq 24 -repetitions 5 -segmentTime 2 -segmentGOP 60 -segmentDirectory "segments"
 ```
 
 ## Analysis

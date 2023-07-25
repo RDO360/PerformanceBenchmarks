@@ -9,8 +9,6 @@ param(
     [Parameter(Mandatory=$true)][String] $preset,
     # The constant quality factor (CRF) between 0 and 51
     [Parameter(Mandatory=$true)][int] $cq,
-    # The height of the tiles. The aspect ratio is kept. An height of 0 means no resizing
-    [Parameter(Mandatory=$true)][int] $height,
     # The number of times to repeat each encoding
     [Parameter(Mandatory=$true)][int] $repetitions,
     # The duration in seconds of each segment
