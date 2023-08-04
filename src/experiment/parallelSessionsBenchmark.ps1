@@ -21,7 +21,7 @@ param(
 
 $outputs = @()
 
-# Save the header of the csv file. Data is added to the file and never overwritten
+# Output the header of the csv file
 Write-Output "session,tile,time"
 
 for ($j = 1; $j -le $sessions; $j++)
@@ -35,7 +35,7 @@ for ($j = 1; $j -le $sessions; $j++)
         New-Item -ItemType Directory -Path $segmentDirectory | Out-Null
 
         # Segments path
-        $segmentsPath = Join-Path -Path $segmentDirectory -ChildPath "output_%d.mp4"
+        $segmentsPath = Join-Path -Path $segmentDirectory -ChildPath "output_%d.mp4" # TODO use different output for each tile, to avoid overwriting
 
         # Execute the FFmpeg commands in parallel
         $outputs = $selectedTiles | ForEach-Object -ThrottleLimit $j -Parallel {
