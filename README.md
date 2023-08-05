@@ -57,7 +57,7 @@ parallelSessionsBenchmark.ps1 -tiles "Rockets16.y4m", "Rockets1.y4m", "Rockets11
 This script benchmarks the time needed to encode videos in parallel with different encoding parameters.
 
 ```powershell
-parametricParallel.ps1 -tile1 "Rockets1.y4m", "h264_nvenc", "p4", 18 -tile2 "Rockets16.y4m", "hevc_nvenc", "p4", 18 -repetitions 5 -segmentTime 2 -segmentGOP 60 -segmentDirectory "segments"
+parametricParallel.ps1 -tile1 "Rockets1.y4m", "h264_nvenc", "p4", 18, 0 -tile2 "Rockets16.y4m", "hevc_nvenc", "p4", 18, 320 -repetitions 5 -segmentTime 2 -segmentGOP 60 -segmentDirectory "segments"
 ```
 
 ## Analysis
