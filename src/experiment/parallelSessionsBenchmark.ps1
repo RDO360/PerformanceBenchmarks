@@ -22,7 +22,7 @@ param(
 $outputs = @()
 
 # Output the header of the csv file
-Write-Output "session,tile,time"
+Write-Output "tile,repetition,time"
 
 for ($j = 1; $j -le $sessions; $j++)
 {
@@ -34,12 +34,14 @@ for ($j = 1; $j -le $sessions; $j++)
         # Create the temporary directory where the segments will be saved
         New-Item -ItemType Directory -Path $segmentDirectory | Out-Null
 
-        # Segments path
-        $segmentsPath = Join-Path -Path $segmentDirectory -ChildPath "output_%d.mp4" # TODO use different output for each tile, to avoid overwriting
-
         # Execute the FFmpeg commands in parallel
         $outputs = $selectedTiles | ForEach-Object -ThrottleLimit $j -Parallel {
-            $output = ffmpeg -benchmark -hide_banner -vsync passthrough -hwaccel cuda -hwaccel_output_format cuda -i $_ -c:v $using:codec -cq $using:cq -b:v 0 -preset $using:preset -rc vbr -g $using:segmentGOP -f segment -segment_time $using:segmentTime -reset_timestamps 1 -movflags faststart $using:segmentsPath 2>&1 | Out-String
+
+            # Segments path
+            $segmentName = $_
+            $segmentsPath = Join-Path -Path $using:segmentDirectory -ChildPath "${segmentName}_%d.mp4"
+
+            $output = ffmpeg -benchmark -hide_banner -vsync passthrough -hwaccel cuda -hwaccel_output_format cuda -i $_ -c:v $using:codec -cq $using:cq -b:v 0 -preset $using:preset -rc vbr -g $using:segmentGOP -f segment -segment_time $using:segmentTime -reset_timestamps 1 -movflags faststart $segmentsPath 2>&1 | Out-String
 
             # Get the time needed to encode the video
             $output -match "rtime=(\d+\.{0,1}\d+)s" | Out-Null
@@ -47,8 +49,8 @@ for ($j = 1; $j -le $sessions; $j++)
 
             # Save the results in a custom object
             [PSCustomObject]@{
-                tile = $_
-                rtime = $rtime
+                Tile = $_
+                Rtime = $rtime
             }
         }
 
@@ -57,10 +59,10 @@ for ($j = 1; $j -le $sessions; $j++)
 
         foreach ($output in $outputs)
         {
-            $tile = $output.tile
-            $rtime = $output.rtime
+            $tile = $output.Tile
+            $rtime = $output.Rtime
 
-            Write-Output "$j,$tile,$rtime"
+            Write-Output "$tile,$j,$rtime"
         }
     }
 }
