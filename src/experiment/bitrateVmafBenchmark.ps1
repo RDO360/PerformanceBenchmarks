@@ -79,14 +79,14 @@ foreach ($tile in $tiles)
                             ffmpeg -loglevel error -vsync passthrough -hwaccel cuda -hwaccel_output_format cuda `
                             -i $rawSegmentPath -c:v $codec -cq $cq -b:v 0 -preset $preset -rc vbr -g $segmentGOP -movflags faststart $segmentPath
 
-                            ffmpeg -loglevel error -i $segmentPath -i $rawSegmentPath -filter_complex "libvmaf=feature=name=psnr:phone_model=1:n_threads=8:log_path=$vmafLogPath\:log_fmt=json" -f null -
+                            ffmpeg -loglevel error -i $segmentPath -i $rawSegmentPath -filter_complex "libvmaf=feature=name=psnr:n_threads=8:log_path=$vmafLogPath\:log_fmt=json" -f null -
                         }
                         else
                         {
                             ffmpeg -loglevel error -vsync passthrough -hwaccel cuda -hwaccel_output_format cuda `
-                            -i $rawSegmentPath -vf "hwupload,scale_cuda=-2:$heights" -c:v $codec -cq $cq -b:v 0 -preset $preset -rc vbr -g $segmentGOP -movflags faststart $segmentPath
+                            -i $rawSegmentPath -vf "hwupload,scale_cuda=-2:$height" -c:v $codec -cq $cq -b:v 0 -preset $preset -rc vbr -g $segmentGOP -movflags faststart $segmentPath
 
-                            ffmpeg -loglevel error -i $segmentPath -i $rawSegmentPath -filter_complex "[0]scale=${tileWidth}x${tileHeight},libvmaf=feature=name=psnr:phone_model=1:n_threads=8:log_path=$vmafLogPath\:log_fmt=json" -f null -
+                            ffmpeg -loglevel error -i $segmentPath -i $rawSegmentPath -filter_complex "[0]scale=${tileWidth}x${tileHeight},libvmaf=feature=name=psnr:n_threads=8:log_path=$vmafLogPath\:log_fmt=json" -f null -
                         }
 
                         # Get the mean VMAF
