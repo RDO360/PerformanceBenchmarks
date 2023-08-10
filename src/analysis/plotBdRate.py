@@ -10,23 +10,42 @@ os.makedirs("plots", exist_ok=True)
 
 frame = pandas.read_csv("data/rocketsBitrateVmaf.csv")
 
-for height in frame.height.unique():
-    original = frame.query("codec == 'h264_nvenc' & preset == 'p1' & height == @height").groupby("cq", as_index=False).mean(numeric_only=True).sort_values("bitrate", ascending=True)
+frame = frame.groupby(["tile", "codec", "preset", "height", "cq"], as_index=False).mean(numeric_only=True)
 
+bdrates = []
+
+for heght in frame.height.unique():
+    for tile in frame.tile.unique():
+        original = frame.query("tile == @tile & codec == 'h264_nvenc' & preset == 'p1' & height == @heght")
+        
+        for codec in frame.codec.unique():
+            for preset in frame.preset.unique():
+                compared = frame.query("tile == @tile & codec == @codec & preset == @preset & height == @heght")
+
+                rate = bdRate(list(original.bitrate), list(original.vmafMean), list(compared.bitrate), list(compared.vmafMean))
+
+                bdrates.append({
+                    "tile": tile,
+                    "codec": codec,
+                    "preset": preset,
+                    "height": heght,
+                    "bdrate": rate
+                })
+
+bdrates = pandas.DataFrame(bdrates)
+
+bdrates = bdrates.groupby(["codec", "preset", "height"], as_index=False).mean(numeric_only=True)
+
+for height in bdrates.height.unique():
     pyplot.figure()
 
-    for codec in frame.codec.unique():
-        presets = []
-        bdRates = []
+    for codec in bdrates.codec.unique():
+        series = bdrates.query("codec == @codec & height == @height")
 
-        for preset in frame.preset.unique():
-            presets.append(preset)
-            compared = frame.query("codec == @codec & preset == @preset & height == @height").groupby("cq", as_index=False).mean(numeric_only=True).sort_values("bitrate", ascending=True)
-
-            rate = bdRate(list(original.bitrate), list(original.vmafMean), list(compared.bitrate), list(compared.vmafMean))
-            bdRates.append(rate)
+        x = series.preset.unique()
+        y = series.bdrate
         
-        pyplot.scatter(x=presets, y=bdRates, label=codec, facecolors="None", edgecolors=codecs[codec]["color"])
+        pyplot.scatter(x, y, label=codec, facecolors="None", edgecolors=codecs[codec]["color"])
         
     pyplot.xlabel("Préréglage")
     pyplot.ylabel("BD-rate (%)")
