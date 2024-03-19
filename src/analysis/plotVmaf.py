@@ -1,16 +1,20 @@
+import argparse
 import math
 from matplotlib import pyplot
 import numpy
-import os
 import pandas
 
 from common import presets
 
-# Create the directory where the plots will be saved
-os.makedirs("plots", exist_ok=True)
+# Arguments
+parser = argparse.ArgumentParser(description="Plots the VMAF of different codecs and presets. Produces one figure for each codec and resolution combination.")
+parser.add_argument("data", help="Path of the CSV file with the bitrate and the distortion.")
+parser.add_argument("figure", nargs="+", help="Paths and filenames of the figures. There must be one path per combination of codec and resolution in the data.")
 
-frame = pandas.read_csv("data/rocketsBitrateVmaf.csv")
+args = parser.parse_args()
 
+# Load data
+frame = pandas.read_csv(args.data)
 frame = frame.groupby(["codec", "preset", "cq", "height"], as_index=False).mean(numeric_only=True)
 
 minVmaf = max(
@@ -24,6 +28,8 @@ maxVmaf = min(
 )
 
 yticks = numpy.arange(minVmaf, maxVmaf, step=2)
+
+i = 0
 
 for codec in frame.codec.unique():
     for height in frame.height.unique():
@@ -46,6 +52,8 @@ for codec in frame.codec.unique():
             pyplot.yticks(yticks)
 
             k += 1
-        
+
         pyplot.legend(title="Préréglage", loc="lower left")
-        pyplot.savefig(f"plots/vmaf_codec_{codec}_height_{height}.svg", bbox_inches="tight")
+        pyplot.savefig(args.figure[i], bbox_inches="tight")
+
+        i += 1

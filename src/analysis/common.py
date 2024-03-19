@@ -30,12 +30,3 @@ presets = {
         "color": "C6"
     }
 }
-
-compareEncodingSpeed = {
-    "Rockets1.y4m": {
-        "marker": "+"
-    },
-    "Rockets16.y4m": {
-        "marker": "x"
-    }
-}

@@ -1,20 +1,25 @@
+import argparse
 from matplotlib import pyplot
-import os
 import pandas
 
 from common import presets
 
-# Create the directory where the plots will be saved
-os.makedirs("plots", exist_ok=True)
+# Arguments
+parser = argparse.ArgumentParser(description="Plots the bitrate in Mbps of different codecs and presets. Produces one figure for each codec and resolution combination.")
+parser.add_argument("data", help="Path of the CSV file with the bitrate and the distortion.")
+parser.add_argument("figure", nargs="+", help="Paths and filenames of the figures. There must be one path per combination of codec and resolution in the data.")
 
-frame = pandas.read_csv("data/rocketsBitrateVmaf.csv")
+args = parser.parse_args()
 
+# Load data
+frame = pandas.read_csv(args.data)
 frame = frame.groupby(["codec", "preset", "cq", "height"], as_index=False).mean(numeric_only=True)
-
 frame.bitrate = frame.bitrate.div(1000 * 1000)
 
 minBitrate = frame.bitrate.min() - 0.5
 maxBitrate = frame.bitrate.max() + 0.5
+
+i = 0
 
 for codec in frame.codec.unique():
     for height in frame.height.unique():
@@ -34,4 +39,6 @@ for codec in frame.codec.unique():
         pyplot.ylim(ymin=minBitrate, ymax=maxBitrate)
 
         pyplot.legend(title="Préréglage")
-        pyplot.savefig(f"plots/bitrate_codec_{codec}_height_{height}.svg", bbox_inches="tight")
+        pyplot.savefig(args.figure[i], bbox_inches="tight")
+
+        i += 1

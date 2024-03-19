@@ -1,54 +1,58 @@
+import argparse
 from matplotlib import pyplot
-import os
 import pandas
 
 from bdRate import bdRate
 from common import codecs
 
-# Create the directory where the plots will be saved
-os.makedirs("plots", exist_ok=True)
+# Arguments
+parser = argparse.ArgumentParser(description="Plots the BD-rate of different codecs and presets for a specific resolution.")
+parser.add_argument("data", help="Path of the CSV file with the bitrate and the distortion.")
+parser.add_argument("height", type=int, help="The height in pixels of the data to consider.")
+parser.add_argument("anchorCodec", help="The reference codec to calculate the BD-rate.")
+parser.add_argument("anchorPreset", help="The reference preset to calculate the BD-rate.")
+parser.add_argument("figure", help="Where to write the figure")
 
-frame = pandas.read_csv("data/rocketsBitrateVmaf.csv")
+args = parser.parse_args()
 
-frame = frame.groupby(["tile", "codec", "preset", "height", "cq"], as_index=False).mean(numeric_only=True)
+# Load data
+frame = pandas.read_csv(args.data)
+frame = frame.query("height == @args.height")
+frame = frame.groupby(["tile", "codec", "preset", "cq"], as_index=False).mean(numeric_only=True)
 
 bdrates = []
 
-for heght in frame.height.unique():
-    for tile in frame.tile.unique():
-        original = frame.query("tile == @tile & codec == 'h264_nvenc' & preset == 'p1' & height == @heght")
-        
-        for codec in frame.codec.unique():
-            for preset in frame.preset.unique():
-                compared = frame.query("tile == @tile & codec == @codec & preset == @preset & height == @heght")
+for tile in frame.tile.unique():
+    original = frame.query("tile == @tile & codec == @args.anchorCodec & preset == @args.anchorPreset")
+    
+    for codec in frame.codec.unique():
+        for preset in frame.preset.unique():
+            compared = frame.query("tile == @tile & codec == @codec & preset == @preset")
 
-                rate = bdRate(list(original.bitrate), list(original.vmafMean), list(compared.bitrate), list(compared.vmafMean))
+            rate = bdRate(list(original.bitrate), list(original.vmafMean), list(compared.bitrate), list(compared.vmafMean))
 
-                bdrates.append({
-                    "tile": tile,
-                    "codec": codec,
-                    "preset": preset,
-                    "height": heght,
-                    "bdrate": rate
-                })
+            bdrates.append({
+                "tile": tile,
+                "codec": codec,
+                "preset": preset,
+                "bdrate": rate
+            })
 
 bdrates = pandas.DataFrame(bdrates)
+bdrates = bdrates.groupby(["codec", "preset"], as_index=False).mean(numeric_only=True)
 
-bdrates = bdrates.groupby(["codec", "preset", "height"], as_index=False).mean(numeric_only=True)
+pyplot.figure()
 
-for height in bdrates.height.unique():
-    pyplot.figure()
+for codec in bdrates.codec.unique():
+    series = bdrates.query("codec == @codec")
 
-    for codec in bdrates.codec.unique():
-        series = bdrates.query("codec == @codec & height == @height")
+    x = series.preset.unique()
+    y = series.bdrate
+    
+    pyplot.scatter(x, y, label=codec, facecolors="None", edgecolors=codecs[codec]["color"])
+    
+pyplot.xlabel("Préréglage")
+pyplot.ylabel("BD-rate (%)")
 
-        x = series.preset.unique()
-        y = series.bdrate
-        
-        pyplot.scatter(x, y, label=codec, facecolors="None", edgecolors=codecs[codec]["color"])
-        
-    pyplot.xlabel("Préréglage")
-    pyplot.ylabel("BD-rate (%)")
-
-    pyplot.legend(title="Codec")
-    pyplot.savefig(f"plots/bd_rate_height_{height}.svg", bbox_inches="tight")
+pyplot.legend(title="Codec")
+pyplot.savefig(args.figure, bbox_inches="tight")

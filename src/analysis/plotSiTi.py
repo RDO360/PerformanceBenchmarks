@@ -1,12 +1,17 @@
-import json
+import argparse
 from matplotlib import pyplot
 import os
 import pandas
 
-# Create the directory where the plots will be saved
-os.makedirs("plots", exist_ok=True)
+# Arguments
+parser = argparse.ArgumentParser(description="Plots the spatial and temporal information of videos.")
+parser.add_argument("data", help="Path of the CSV file with the spatial and temporal information for each video.")
+parser.add_argument("figure", help="Path and filename of the figure.")
 
-frame = pandas.read_csv("data/rocketsSiTi.csv")
+args = parser.parse_args()
+
+# Load data
+frame = pandas.read_csv(args.data)
 frame = frame.groupby("input_file", as_index=False).mean(numeric_only=True)
 
 pyplot.figure()
@@ -16,4 +21,4 @@ pyplot.scatter(x="si", y="ti", data=frame)
 pyplot.xlabel("Information spatiale moyenne")
 pyplot.ylabel("Information temporelle moyenne")
 
-pyplot.savefig("plots/si_ti_rockets.svg", bbox_inches="tight")
+pyplot.savefig(args.figure, bbox_inches="tight")
