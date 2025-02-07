@@ -5,8 +5,8 @@ param(
 	[Parameter(Mandatory=$true)][String[]] $codecs,
 	# An array of presets
 	[Parameter(Mandatory=$true)][String[]] $presets,
-	# An array of constant quality factor (CRF) between 0 and 51
-	[Parameter(Mandatory=$true)][int[]] $cqs,
+	# An array of constant quantization parameters between 0 and 51
+	[Parameter(Mandatory=$true)][int[]] $qps,
 	# An array of heights. The aspect ratio is kept. An height of 0 means no resizing
 	[Parameter(Mandatory=$true)][int[]] $heights,
 	# The duration in seconds of each segment
@@ -23,13 +23,13 @@ param(
 
 # Calculate the number of encodings that will be done
 $currentIteration = 1
-$totalIterations = $tiles.Length * $codecs.Length * $presets.Length * $cqs.Length * $heights.Length
+$totalIterations = $tiles.Length * $codecs.Length * $presets.Length * $qps.Length * $heights.Length
 
 # Create the directory where the VMAF logs of the segments will be saved
 New-Item -ItemType Directory -Path $vmafLogDirectory | Out-Null
 
 # Save the header of the csv file. Data is added to the file and never overwritten
-Write-Output "tile,codec,preset,cq,height,bitrate,vmafMean,vmafLogFile" >> $dataFile
+Write-Output "tile,codec,preset,qp,height,bitrate,vmafMean,vmafLogFile" >> $dataFile
 
 foreach ($tile in $tiles)
 {
@@ -43,12 +43,12 @@ foreach ($tile in $tiles)
 	{
 		foreach ($preset in $presets)
 		{
-			foreach ($cq in $cqs)
+			foreach ($qp in $qps)
 			{
 				foreach ($height in $heights)
 				{
                     Write-Output "Iteration $currentIteration out of $totalIterations"
-                    Write-Output "Params : $tile, $codec, $preset, $cq, $height"
+                    Write-Output "Params : $tile, $codec, $preset, $qp, $height"
 
                     # Create the temporary directory where the segments will be saved
                     New-Item -ItemType Directory -Path $segmentDirectory | Out-Null
@@ -70,21 +70,21 @@ foreach ($tile in $tiles)
                         $segmentPath = Join-Path -Path $segmentDirectory -ChildPath "output_$segment.mp4"
 
                         # We cant use Join-Path, since libvmaf only accepts / as a path separator, even on Windows
-                        $vmafLogFile = "vmaf_tile_${tile}_segment_${segment}_codec_${codec}_preset_${preset}_cq_${cq}_height_${height}.json"
+                        $vmafLogFile = "vmaf_tile_${tile}_segment_${segment}_codec_${codec}_preset_${preset}_qp_${qp}_height_${height}.json"
                         $vmafLogPath = $vmafLogDirectory + "/" + $vmafLogFile
 
                         # Encode the segment and get the VMAF
                         if ($height -eq 0)
                         {
                             ffmpeg -loglevel error -vsync passthrough -hwaccel cuda -hwaccel_output_format cuda `
-                            -i $rawSegmentPath -c:v $codec -cq $cq -b:v 0 -preset $preset -rc vbr -g $segmentGOP -movflags faststart $segmentPath
+                            -i $rawSegmentPath -c:v $codec -qp $qp -b:v 0 -preset $preset -rc constqp -g $segmentGOP -movflags faststart $segmentPath
 
                             ffmpeg -loglevel error -i $segmentPath -i $rawSegmentPath -filter_complex "libvmaf=feature=name=psnr:n_threads=8:log_path=$vmafLogPath\:log_fmt=json" -f null -
                         }
                         else
                         {
                             ffmpeg -loglevel error -vsync passthrough -hwaccel cuda -hwaccel_output_format cuda `
-                            -i $rawSegmentPath -vf "hwupload,scale_cuda=-2:$height" -c:v $codec -cq $cq -b:v 0 -preset $preset -rc vbr -g $segmentGOP -movflags faststart $segmentPath
+                            -i $rawSegmentPath -vf "hwupload,scale_cuda=-2:$height" -c:v $codec -qp $qp -b:v 0 -preset $preset -rc constqp -g $segmentGOP -movflags faststart $segmentPath
 
                             ffmpeg -loglevel error -i $segmentPath -i $rawSegmentPath -filter_complex "[0]scale=${tileWidth}x${tileHeight},libvmaf=feature=name=psnr:n_threads=8:log_path=$vmafLogPath\:log_fmt=json" -f null -
                         }
@@ -98,7 +98,7 @@ foreach ($tile in $tiles)
                         $bitrate = $probe.streams[0].bit_rate
 
                         # Save the data to the data file
-                        Write-Output "$tile,$codec,$preset,$cq,$height,$bitrate,$vmafMean,$vmafLogFile" >> $dataFile
+                        Write-Output "$tile,$codec,$preset,$qp,$height,$bitrate,$vmafMean,$vmafLogFile" >> $dataFile
                     }
 
                     # Delete the videos

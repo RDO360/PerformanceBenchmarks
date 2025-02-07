@@ -5,8 +5,8 @@ param(
 	[Parameter(Mandatory=$true)][String[]] $codecs,
 	# An array of presets
 	[Parameter(Mandatory=$true)][String[]] $presets,
-	# An array of constant quality factor (CRF) between 0 and 51
-	[Parameter(Mandatory=$true)][int[]] $cqs,
+	# An array of constant quantization parameters between 0 and 51
+	[Parameter(Mandatory=$true)][int[]] $qps,
 	# An array of heights. The aspect ratio is kept. An height of 0 means no resizing
 	[Parameter(Mandatory=$true)][int[]] $heights,
 	# The number of times to repeat each encoding
@@ -23,10 +23,10 @@ param(
 
 # Calculate the number of encodings that will be done
 $currentIteration = 1
-$totalIterations = $tiles.Length * $codecs.Length * $presets.Length * $cqs.Length * $heights.Length * $repetitions
+$totalIterations = $tiles.Length * $codecs.Length * $presets.Length * $qps.Length * $heights.Length * $repetitions
 
 # Save the header of the csv file. Data is added to the file and never overwritten
-Write-Output "tile,codec,preset,cq,height,time" >> $dataFile
+Write-Output "tile,codec,preset,qp,height,time" >> $dataFile
 
 foreach ($tile in $tiles)
 {
@@ -34,14 +34,14 @@ foreach ($tile in $tiles)
 	{
 		foreach ($preset in $presets)
 		{
-			foreach ($cq in $cqs)
+			foreach ($qp in $qps)
 			{
 				foreach ($height in $heights)
 				{
 					for ($i = 0; $i -lt $repetitions; $i++)
 					{
 						Write-Output "Iteration $currentIteration out of $totalIterations"
-						Write-Output "Params : $tile, $codec, $preset, $cq, $height, $i"
+						Write-Output "Params : $tile, $codec, $preset, $qp, $height, $i"
 						
 						# Create the temporary directory where the segments will be saved
 						New-Item -ItemType "directory" -Path $segmentDirectory | Out-Null
@@ -50,11 +50,11 @@ foreach ($tile in $tiles)
 						
 						if ($height -eq 0)
 						{
-							$output = ffmpeg -benchmark -hide_banner -vsync passthrough -hwaccel cuda -hwaccel_output_format cuda -i $tile -c:v $codec -cq $cq -b:v 0 -preset $preset -rc vbr -g $segmentGOP -f segment -segment_time $segmentTime -reset_timestamps 1 -movflags faststart $segmentDirectory\output_%d.mp4 2>&1 | Out-String
+							$output = ffmpeg -benchmark -hide_banner -vsync passthrough -hwaccel cuda -hwaccel_output_format cuda -i $tile -c:v $codec -qp $qp -b:v 0 -preset $preset -rc vbr -g $segmentGOP -f segment -segment_time $segmentTime -reset_timestamps 1 -movflags faststart $segmentDirectory\output_%d.mp4 2>&1 | Out-String
 						}
 						else
 						{
-							$output = ffmpeg -benchmark -hide_banner -vsync passthrough -hwaccel cuda -hwaccel_output_format cuda -i $tile -vf "hwupload,scale_cuda=-2:$height" -c:v $codec -cq $cq -b:v 0 -preset $preset -rc vbr -g $segmentGOP -f segment -segment_time $segmentTime -reset_timestamps 1 -movflags faststart $segmentDirectory\output_%d.mp4 2>&1 | Out-String
+							$output = ffmpeg -benchmark -hide_banner -vsync passthrough -hwaccel cuda -hwaccel_output_format cuda -i $tile -vf "hwupload,scale_cuda=-2:$height" -c:v $codec -qp $qp -b:v 0 -preset $preset -rc vbr -g $segmentGOP -f segment -segment_time $segmentTime -reset_timestamps 1 -movflags faststart $segmentDirectory\output_%d.mp4 2>&1 | Out-String
 						}
 						
 						# Delete all the videos. This must be done since overwritting the videos with FFmpeg slows down the process
@@ -65,7 +65,7 @@ foreach ($tile in $tiles)
 						$rtime = $matches[1]
 						
 						# Save the data to the data file
-						Write-Output "$tile,$codec,$preset,$cq,$height,$rtime" >> $dataFile
+						Write-Output "$tile,$codec,$preset,$qp,$height,$rtime" >> $dataFile
 						
 						$currentIteration += 1
 					}
