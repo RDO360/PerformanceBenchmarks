@@ -26,7 +26,7 @@ $currentIteration = 1
 $totalIterations = $tiles.Length * $codecs.Length * $presets.Length * $qps.Length * $heights.Length * $repetitions
 
 # Save the header of the csv file. Data is added to the file and never overwritten
-Write-Output "tile,codec,preset,qp,height,time" >> $dataFile
+Write-Output "tile,repetition,codec,preset,qp,height,time" >> $dataFile
 
 foreach ($tile in $tiles)
 {
@@ -65,7 +65,7 @@ foreach ($tile in $tiles)
 						$rtime = $matches[1]
 						
 						# Save the data to the data file
-						Write-Output "$tile,$codec,$preset,$qp,$height,$rtime" >> $dataFile
+						Write-Output "$tile,$i,$codec,$preset,$qp,$height,$rtime" >> $dataFile
 						
 						$currentIteration += 1
 					}

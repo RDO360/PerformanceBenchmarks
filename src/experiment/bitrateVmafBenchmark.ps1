@@ -29,7 +29,7 @@ $totalIterations = $tiles.Length * $codecs.Length * $presets.Length * $qps.Lengt
 New-Item -ItemType Directory -Path $vmafLogDirectory | Out-Null
 
 # Save the header of the csv file. Data is added to the file and never overwritten
-Write-Output "tile,codec,preset,qp,height,bitrate,vmafMean,vmafLogFile" >> $dataFile
+Write-Output "tile,segment,codec,preset,qp,height,bitrate,vmafMean,vmafLogFile" >> $dataFile
 
 foreach ($tile in $tiles)
 {
@@ -64,7 +64,9 @@ foreach ($tile in $tiles)
                     # Encode the segment and get its bitrate and VMAF
                     for ($segment = 0; $segment -lt $numSegments; $segment++)
                     {
-                        Write-Output "Processing segment $segment out of $numSegments"
+                        $segmentPlusOne = $segment + 1
+
+                        Write-Output "Processing segment $segmentPlusOne out of $numSegments"
 
                         $rawSegmentPath = Join-Path -Path $segmentDirectory -ChildPath "output_$segment.y4m"
                         $segmentPath = Join-Path -Path $segmentDirectory -ChildPath "output_$segment.mp4"
@@ -98,7 +100,7 @@ foreach ($tile in $tiles)
                         $bitrate = $probe.streams[0].bit_rate
 
                         # Save the data to the data file
-                        Write-Output "$tile,$codec,$preset,$qp,$height,$bitrate,$vmafMean,$vmafLogFile" >> $dataFile
+                        Write-Output "$tile,$segment,$codec,$preset,$qp,$height,$bitrate,$vmafMean,$vmafLogFile" >> $dataFile
                     }
 
                     # Delete the videos
