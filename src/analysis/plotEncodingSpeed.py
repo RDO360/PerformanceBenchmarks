@@ -2,44 +2,64 @@ import argparse
 from matplotlib import pyplot
 import pandas
 
-from common import presets
+from utils import parseKeyPair
+import common
 
 # Arguments
 parser = argparse.ArgumentParser(description="Plots the encoding speed in frames per second of different codecs and presets. Produces one figure for each codec and resolution combination.")
 parser.add_argument("data", help="Path of the CSV file with the encoding time.")
-parser.add_argument("numFrames", type=int, help="The number of frames in the video sequences.")
-parser.add_argument("figure", nargs="+", help="Paths and filenames of the figures. There must be one path per combination of codec and resolution in the data.")
+parser.add_argument("figure", help="Path and filename of the figure.")
+# parser.add_argument("numFrames", type=int, help="The number of frames in the video sequences.")
+parser.add_argument("--heightLabels", nargs="+", help="The labels for the resolutions, in order in which they appear in the data.")
 
 args = parser.parse_args()
+heightLabels = parseKeyPair(args.heightLabels)
 
 # Load data
 frame = pandas.read_csv(args.data)
-frame = frame.groupby(["codec", "preset", "cq", "height"], as_index=False).mean(numeric_only=True)
-frame["speed"] = args.numFrames / frame.time
+frame = frame.groupby(["tile", "codec", "preset", "height"], as_index=False).mean(numeric_only=True)
 
-minSpeed = frame.speed.min() - 50
-maxSpeed = frame.speed.max() + 50
+# Plot data
+tiles = frame.tile.unique()
+numTiles = len(tiles)
+heights = frame.height.unique()
+codecs = frame.codec.unique()
 
-i = 0
+figure = pyplot.figure(figsize=(4.5, 10.5))
+subfigures = figure.subfigures(numTiles, 1)
 
-for codec in frame.codec.unique():
-    for height in frame.height.unique():
-        pyplot.figure()
+for i, tile in enumerate(tiles):
+    subfigure = subfigures[i]
+    subfigure.suptitle(tile, size=10)
+    subfigure.subplots_adjust(bottom=0.27, top=0.81, wspace=0.1)
+    subfigure.patch.set_alpha(0)
 
-        for preset in frame.preset.unique():
-            series = frame.query("codec == @codec & preset == @preset & height == @height")
-            x = series.cq
+    axes = subfigure.subplots(1, len(heights), sharey=True)
+
+    for j, height in enumerate(heights):
+        axis = axes[j]
+
+        for k, codec in enumerate(codecs):
+            series = frame.query("tile == @tile and height == @height and codec == @codec")
+
+            x = series.preset
             y = series.speed
 
-            pyplot.scatter(x=x, y=y, label=preset, facecolors="None", edgecolors=presets[preset]["color"])
+            color = common.codecs[codec]["color"]
+            marker = common.markers[k]
+            
+            axis.scatter(x, y, label=codec, facecolors="None", edgecolors=color, marker=marker)
 
-        pyplot.xlabel("Facteur de qualité")
-        pyplot.xticks(frame.cq.unique())
+# Label the axes
+subfigures[numTiles - 1].supxlabel("Preset", y=-0.15)
+subfigures[numTiles // 2].supylabel("Encoding speed (frames per second)", x=-0.01)
 
-        pyplot.ylabel("Vitesse d'encodage (images par seconde)")
-        pyplot.ylim(ymin=minSpeed, ymax=maxSpeed)
+# Label the resolutions
+for i, height in enumerate(heights):
+    label = heightLabels[height]
+    subfigures[0].axes[i].set_title(label, y=1.3)
 
-        pyplot.legend(title="Préréglage", loc="upper left", bbox_to_anchor=(1, 1))
-        pyplot.savefig(args.figure[i], bbox_inches="tight")
+# Build the legend
+subfigures[0].axes[0].legend(title="Codec", ncol=2, bbox_to_anchor=(0.5, 1.07), bbox_transform=figure.transFigure, loc="upper center", prop={"size": 8}, title_fontsize=8)
 
-        i += 1
+pyplot.savefig(args.figure, bbox_inches="tight")

@@ -2,18 +2,20 @@ import argparse
 from matplotlib import pyplot
 import pandas
 
+from utils import parseKeyPair
 from bdRate import bdRate
-from common import codecs, markers
+import common
 
 # Arguments
 parser = argparse.ArgumentParser(description="Plots the BD-rate performance for all tiles, codecs and presets.")
 parser.add_argument("data", help="Path of the CSV file with the bitrate and the distortion.")
 parser.add_argument("anchorCodec", help="The reference codec to calculate the BD-rate.")
 parser.add_argument("anchorPreset", help="The reference preset to calculate the BD-rate.")
-parser.add_argument("figure", help="Where to write the figure")
-parser.add_argument("heightsTitles", nargs="+", help="The labels for the resolutions, in order in which they appear in the data.")
+parser.add_argument("figure", help="Path and filename of the figure.")
+parser.add_argument("--heightLabels", nargs="+", help="The labels for the resolutions, in order in which they appear in the data.")
 
 args = parser.parse_args()
+heightLabels = parseKeyPair(args.heightLabels)
 
 # Load data
 frame = pandas.read_csv(args.data)
@@ -43,50 +45,48 @@ for tile in frame.tile.unique():
 bdRates = pandas.DataFrame(bdRates)
 
 # Plot data
-numTiles = len(bdRates.tile.unique())
-numHeights = len(bdRates.height.unique())
-numCodecs = len(bdRates.codec.unique())
+tiles = bdRates.tile.unique()
+numTiles = len(tiles)
+
+heights = bdRates.height.unique()
+
+codecs = bdRates.codec.unique()
 
 figure = pyplot.figure(figsize=(4.5, 10.5))
 subfigures = figure.subfigures(numTiles, 1)
 
-i = 0
-k = 0
-
-for tile in bdRates.tile.unique():
+for i, tile in enumerate(tiles):
     subfigure = subfigures[i]
     subfigure.suptitle(tile, size=10)
     subfigure.subplots_adjust(bottom=0.27, top=0.81, wspace=0.1)
     subfigure.patch.set_alpha(0)
 
-    j = 0
-    axes = subfigure.subplots(1, numHeights, sharey=True)
+    axes = subfigure.subplots(1, len(heights), sharey=True)
 
-    for height in bdRates.height.unique():
+    for j, height in enumerate(heights):
         axis = axes[j]
-        j += 1
 
-        for codec in bdRates.codec.unique():
+        for k, codec in enumerate(codecs):
             series = bdRates.query("tile == @tile and height == @height and codec == @codec")
 
             x = series.preset.unique()
             y = series.bdrate
 
-            marker = markers[k % numCodecs]
+            color = common.codecs[codec]["color"]
+            marker = common.markers[k]
             
-            axis.scatter(x, y, label=codec, facecolors="None", edgecolors=codecs[codec]["color"], marker=marker)
+            axis.scatter(x, y, label=codec, facecolors="None", edgecolors=color, marker=marker)
 
-            k += 1
-
-    i += 1
-
+# Label the axes
 subfigures[numTiles - 1].supxlabel("Preset", y=-0.15)
 subfigures[numTiles // 2].supylabel("Rate-distortion (%)", x=-0.01)
 
-# Set the resolutions labels
-for i in range(0, numHeights):
-    subfigures[0].axes[i].set_title(args.heightsTitles[i], y=1.3)
+# Label the resolutions
+for i, height in enumerate(heights):
+    label = heightLabels[height]
+    subfigures[0].axes[i].set_title(label, y=1.3)
 
+# Build the legend
 subfigures[0].axes[0].legend(title="Codec", ncol=2, bbox_to_anchor=(0.5, 1.07), bbox_transform=figure.transFigure, loc="upper center", prop={"size": 8}, title_fontsize=8)
 
 pyplot.savefig(args.figure, bbox_inches="tight")
