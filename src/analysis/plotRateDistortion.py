@@ -12,10 +12,10 @@ parser.add_argument("data", help="Path of the CSV file with the bitrate and the 
 parser.add_argument("anchorCodec", help="The reference codec to calculate the BD-rate.")
 parser.add_argument("anchorPreset", help="The reference preset to calculate the BD-rate.")
 parser.add_argument("figure", help="Path and filename of the figure.")
-parser.add_argument("--heightLabels", nargs="+", help="The labels for the resolutions, in order in which they appear in the data.")
+parser.add_argument("--heightLabels", nargs="+", help="The labels for the resolutions in key-value pairs (e.g. 0='Label 1' 500='Label 2').")
 
 args = parser.parse_args()
-heightLabels = parseKeyPair(args.heightLabels)
+heightLabels = parseKeyPair(args.heightLabels, int, str)
 
 # Load data
 frame = pandas.read_csv(args.data)

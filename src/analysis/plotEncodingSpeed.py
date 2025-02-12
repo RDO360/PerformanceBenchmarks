@@ -9,15 +9,19 @@ import common
 parser = argparse.ArgumentParser(description="Plots the encoding speed in frames per second of different codecs and presets. Produces one figure for each codec and resolution combination.")
 parser.add_argument("data", help="Path of the CSV file with the encoding time.")
 parser.add_argument("figure", help="Path and filename of the figure.")
-# parser.add_argument("numFrames", type=int, help="The number of frames in the video sequences.")
-parser.add_argument("--heightLabels", nargs="+", help="The labels for the resolutions, in order in which they appear in the data.")
+parser.add_argument("--heightLabels", nargs="+", help="The labels for the resolutions in key-value pairs (e.g. 0='Label 1' 500='Label 2').")
+parser.add_argument("--numFrames", nargs="+", help="The number of frames in each tile in key-value pairs (e.g. tile1=500 tile2=350).")
 
 args = parser.parse_args()
-heightLabels = parseKeyPair(args.heightLabels)
+heightLabels = parseKeyPair(args.heightLabels, int, str)
+numFrames = parseKeyPair(args.numFrames, str, int)
 
 # Load data
 frame = pandas.read_csv(args.data)
 frame = frame.groupby(["tile", "codec", "preset", "height"], as_index=False).mean(numeric_only=True)
+
+# Compute encoding speed
+frame["speed"] = frame["tile"].map(numFrames) / frame["time"]
 
 # Plot data
 tiles = frame.tile.unique()
