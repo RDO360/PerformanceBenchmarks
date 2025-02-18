@@ -50,11 +50,11 @@ foreach ($tile in $tiles)
 						
 						if ($height -eq 0)
 						{
-							$output = ffmpeg -benchmark -hide_banner -vsync passthrough -hwaccel cuda -hwaccel_output_format cuda -i $tile -c:v $codec -qp $qp -b:v 0 -preset $preset -rc vbr -g $segmentGOP -f segment -segment_time $segmentTime -reset_timestamps 1 -movflags faststart $segmentDirectory\output_%d.mp4 2>&1 | Out-String
+							$output = ffmpeg -benchmark -hide_banner -vsync passthrough -hwaccel cuda -hwaccel_output_format cuda -i $tile -c:v $codec -qp $qp -b:v 0 -preset $preset -rc constqp -g $segmentGOP -f segment -segment_time $segmentTime -reset_timestamps 1 -movflags faststart $segmentDirectory\output_%d.mp4 2>&1 | Out-String
 						}
 						else
 						{
-							$output = ffmpeg -benchmark -hide_banner -vsync passthrough -hwaccel cuda -hwaccel_output_format cuda -i $tile -vf "hwupload,scale_cuda=-2:$height" -c:v $codec -qp $qp -b:v 0 -preset $preset -rc vbr -g $segmentGOP -f segment -segment_time $segmentTime -reset_timestamps 1 -movflags faststart $segmentDirectory\output_%d.mp4 2>&1 | Out-String
+							$output = ffmpeg -benchmark -hide_banner -vsync passthrough -hwaccel cuda -hwaccel_output_format cuda -i $tile -vf "hwupload,scale_cuda=-2:$height" -c:v $codec -qp $qp -b:v 0 -preset $preset -rc constqp -g $segmentGOP -f segment -segment_time $segmentTime -reset_timestamps 1 -movflags faststart $segmentDirectory\output_%d.mp4 2>&1 | Out-String
 						}
 						
 						# Delete all the videos. This must be done since overwritting the videos with FFmpeg slows down the process
