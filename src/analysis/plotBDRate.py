@@ -79,7 +79,7 @@ for i, tile in enumerate(tiles):
 
 # Label the axes
 subfigures[numTiles - 1].supxlabel("Preset", y=-0.15)
-subfigures[numTiles // 2].supylabel("Rate-distortion (%)", x=-0.01)
+subfigures[numTiles // 2].supylabel("BD-rate (%)", x=-0.01)
 
 # Label the resolutions
 for i, height in enumerate(heights):
