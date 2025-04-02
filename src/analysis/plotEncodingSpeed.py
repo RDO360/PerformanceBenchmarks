@@ -2,7 +2,7 @@ import argparse
 from matplotlib import pyplot
 import pandas
 
-from utils import parseKeyPair
+from analysis.keyPairArg import parseKeyPair
 import common
 
 # Arguments
