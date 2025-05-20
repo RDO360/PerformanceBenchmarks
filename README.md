@@ -34,7 +34,7 @@ This script evaluates the bitrate and visual quality of videos with differents e
 Example usage :
 
 ```powershell
-bitrateVmafBenchmark.ps1 -tiles "tile1.y4m", "tile2.y4m" -codecs "h264_nvenc", "hevc_nvenc" -presets "p1", "p2" -qps 18, 20 -heights 0, 320 -segmentTime 2 -segmentGOP 60 -segmentDirectory ".\segments" -dataFile data.csv -vmafLogDirectory "vmafLogs"
+bitrateVmaf.ps1 -tiles "tile1.y4m", "tile2.y4m" -codecs "h264_nvenc", "hevc_nvenc" -presets "p1", "p2" -qps 18, 20 -heights 0, 320 -segmentTime 2 -segmentGOP 60 -segmentDirectory ".\segments" -dataFile data.csv -vmafLogDirectory "vmafLogs"
 ```
 
 ### Encoding Speed Benchmark
@@ -44,7 +44,7 @@ This script evaluates the time needed to encode the segments of the videos with 
 #### Example Usage
 
 ```powershell
-encodingSpeedBenchmark.ps1 -tiles "tile1.y4m", "tile2.y4m" -codecs "h264_nvenc", "hevc_nvenc" -presets "p1", "p2" -cqs 18, 20 -heights 0, 320 -repetitions 5 -segmentTime 2 -segmentGOP 60 -segmentDirectory ".\segment" -dataFile data.csv
+encodingSpeed.ps1 -tiles "tile1.y4m", "tile2.y4m" -codecs "h264_nvenc", "hevc_nvenc" -presets "p1", "p2" -cqs 18, 20 -heights 0, 320 -repetitions 5 -segmentTime 2 -segmentGOP 60 -segmentDirectory ".\segment" -dataFile data.csv
 ```
 
 ## Analysis
