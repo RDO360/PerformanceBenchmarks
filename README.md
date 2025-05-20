@@ -8,8 +8,9 @@ If you use any part of this repository, please [cite our work](#citation).
 
 ## Installation
 
-1. Install the latest version of [Python 3.10](https://www.python.org/downloads/), including `pip`.
-1. Install the required Python packages using `pip install -r requirements.txt`.
+1. Install the latest version of [Python 3.12](https://www.python.org/downloads/), including `pip`.
+1. [Install the uv package manager](https://github.com/astral-sh/uv).
+1. Install the required Python packages using `uv sync`.
 1. To execute the [experiments](#experiments), install [Powershell](https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell).
 1. To run the [Spatial and Temporal Information experiment](#spatial-and-temporal-information), install [siti-tools](https://github.com/VQEG/siti-tools#requirements).
 
