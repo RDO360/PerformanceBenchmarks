@@ -25,9 +25,6 @@ param(
 $currentIteration = 1
 $totalIterations = $tiles.Length * $codecs.Length * $presets.Length * $qps.Length * $heights.Length
 
-# Create the directory where the VMAF logs of the segments will be saved
-New-Item -ItemType Directory -Path $vmafLogDirectory | Out-Null
-
 # Save the header of the csv file. Data is added to the file and never overwritten
 Write-Output "tile,segment,repetition,codec,preset,qp,height,encodingTime" >> $dataFile
 
