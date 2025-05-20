@@ -2,8 +2,8 @@ import argparse
 from matplotlib import pyplot
 import pandas
 
-from analysis.keyPairArg import parseKeyPair
-import common
+from src.analysis.common.keyPairArg import parseKeyPair
+from src.analysis.common import common
 
 # Arguments
 parser = argparse.ArgumentParser(description="Plots the encoding speed in frames per second of different codecs and presets. Produces one figure for each codec and resolution combination.")

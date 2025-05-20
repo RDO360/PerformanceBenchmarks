@@ -2,9 +2,9 @@ import argparse
 from matplotlib import pyplot
 import pandas
 
-from analysis.keyPairArg import parseKeyPair
-from bdRate import bdRate
-import common
+from src.analysis.common.keyPairArg import parseKeyPair
+from src.analysis.common import common
+from src.analysis.benchmark.bdRate import bdRate
 
 # Arguments
 parser = argparse.ArgumentParser(description="Plots the BD-rate performance for all tiles, codecs and presets.")
