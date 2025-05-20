@@ -71,11 +71,11 @@ foreach ($tile in $tiles)
                             # Encode the segment
                             if ($height -eq 0)
                             {
-                                ffmpeg -benchmark -hide_banner -vsync passthrough -hwaccel cuda -hwaccel_output_format cuda -i $rawSegmentPath -c:v $codec -qp $qp -b:v 0 -preset $preset -rc constqp -g $segmentGOP -movflags faststart $segmentPath
+                                $output = ffmpeg -benchmark -hide_banner -vsync passthrough -hwaccel cuda -hwaccel_output_format cuda -i $rawSegmentPath -c:v $codec -qp $qp -b:v 0 -preset $preset -rc constqp -g $segmentGOP -movflags faststart $segmentPath 2>&1 | Out-String
                             }
                             else
                             {
-                                ffmpeg benchmark -hide_banner -vsync passthrough -hwaccel cuda -hwaccel_output_format cuda -i $rawSegmentPath -vf "hwupload,scale_cuda=-2:$height" -c:v $codec -qp $qp -b:v 0 -preset $preset -rc constqp -g $segmentGOP -movflags faststart $segmentPath
+                                $output = ffmpeg benchmark -hide_banner -vsync passthrough -hwaccel cuda -hwaccel_output_format cuda -i $rawSegmentPath -vf "hwupload,scale_cuda=-2:$height" -c:v $codec -qp $qp -b:v 0 -preset $preset -rc constqp -g $segmentGOP -movflags faststart $segmentPath 2>&1 | Out-String
                             }
 
                             # Get the time needed to encode the video
