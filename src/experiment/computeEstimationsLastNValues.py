@@ -13,7 +13,7 @@ args = parser.parse_args()
 data = pandas.read_csv(args.data)
 
 # Estimate the visual quality
-data["predictedVmafMean"] = data.groupby(["tile", "codec", "preset", "qp", "height"], as_index=False)["vmafMean"].transform(lambda x: x.rolling(window=args.numSegments, min_periods=1, closed="left").mean())
+data["predictedVmafMean5"] = data.groupby(["tile", "codec", "preset", "qp", "height"], as_index=False)["vmafMean5"].transform(lambda x: x.rolling(window=args.numSegments, min_periods=1, closed="left").mean())
 
 # Save the data
 data.to_csv(args.results, index=False)
