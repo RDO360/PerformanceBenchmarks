@@ -1,7 +1,7 @@
 param(
 	# An array of tiles to encode
 	[Parameter(Mandatory=$true)][String[]] $tiles,
-	# An array of codecs. Codecs must be supported by the hardware encoder
+	# An array of codecs. Codecs must be supported by FFmpeg
 	[Parameter(Mandatory=$true)][String[]] $codecs,
 	# An array of presets
 	[Parameter(Mandatory=$true)][String[]] $presets,

@@ -14,6 +14,7 @@ parser.add_argument("actual", help="Name of the CSV column that contains the act
 parser.add_argument("figure", help="Path and filename of the figure.")
 parser.add_argument("--xstep", type=int, help="The step frequency for the x axis.")
 parser.add_argument("--split", help="The column name used to split the data into labels.")
+parser.add_argument("--x-units", dest="xunits", help="The units of the x-axis.")
 
 args = parser.parse_args()
 
@@ -50,7 +51,13 @@ else:
 
 pyplot.grid(True)
 
-pyplot.xlabel(xlabels[args.method])
+# Labels and legend
+label = xlabels[args.method]
+
+if (args.xunits):
+    label += f" ({args.xunits})"
+
+pyplot.xlabel(label)
 
 if (args.xstep):
     pyplot.gca().xaxis.set_major_locator(ticker.MultipleLocator(args.xstep))
