@@ -23,7 +23,7 @@ param(
 
 # Calculate the number of encodings that will be done
 $currentIteration = 1
-$totalIterations = $tiles.Length * $codecs.Length * $presets.Length * $qps.Length * $heights.Length
+$totalIterations = $tiles.Length * $codecs.Length * $presets.Length * $qps.Length * $heights.Length * $repetitions
 
 # Save the header of the csv file. Data is added to the file and never overwritten
 Write-Output "tile,segment,repetition,codec,preset,qp,height,encodingTime" >> $dataFile
