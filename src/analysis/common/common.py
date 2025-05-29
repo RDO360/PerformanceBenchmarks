@@ -31,4 +31,31 @@ presets = {
     }
 }
 
+tiles = {
+    "fireplace33.y4m": {
+        "color": "C0"
+    },
+    "fireplace5.y4m": {
+        "color": "C1"
+    },
+    "fireplace6.y4m": {
+        "color": "C2"
+    },
+    "suburb13.y4m": {
+        "color": "C3"
+    },
+    "suburb19.y4m": {
+        "color": "C4"
+    },
+    "suburb31.y4m": {
+        "color": "C5"
+    },
+    "virtualReality24.y4m": {
+        "color": "C6"
+    },
+    "virtualReality26.y4m": {
+        "color": "C7"
+    }
+}
+
 markers = ["o", "s", "v", "p", "*", "^", "+", "x", "D", "p", "H", "<", ">", ]

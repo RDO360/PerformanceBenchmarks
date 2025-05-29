@@ -1,6 +1,8 @@
 param(
 	# The path of the CSV file to read
 	[Parameter(Mandatory=$true)][String] $in,
+    # Compute the VMAF every N frame
+    [Parameter(Mandatory=$true)][Int32] $subsample,
     # The path of the CSV file to write
     [Parameter(Mandatory=$true)][String] $out
 )
@@ -25,8 +27,8 @@ foreach ($row in $csv)
     # Compute the subsampled VMAF
     foreach ($frame in $json.frames)
     {
-        # Skip every 2 frames
-        if ($i % 10 -eq 0)
+        # Compute the VMAF every N frame
+        if ($i % $subsample -eq 0)
         {
             $vmaf += [double]$frame.metrics.vmaf
             $numFrames++
@@ -37,8 +39,11 @@ foreach ($row in $csv)
 
     $vmaf /= $numFrames
 
+    # Update VMAF
+    $row.vmafMean = $vmaf.ToString([System.Globalization.CultureInfo]::InvariantCulture)
+
     # Add the result to the CSV file
-    $row | Add-Member -NotePropertyName "vmafMean10" -NotePropertyValue $vmaf.ToString([System.Globalization.CultureInfo]::InvariantCulture)
+    $row | Add-Member -NotePropertyName "vmafSubsampling" -NotePropertyValue $subsample
 }
 
 # Write the CSV file

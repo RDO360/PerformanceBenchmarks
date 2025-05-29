@@ -13,13 +13,16 @@ parser.add_argument("predicted", help="Name of the CSV column that contains the 
 parser.add_argument("actual", help="Name of the CSV column that contains the actual values.")
 parser.add_argument("figure", help="Path and filename of the figure.")
 parser.add_argument("--xstep", type=int, help="The step frequency for the x axis.")
-parser.add_argument("--split", help="The column name used to split the data into labels.")
 parser.add_argument("--x-units", dest="xunits", help="The units of the x-axis.")
+parser.add_argument("--split", help="The column name used to split the data into labels.")
+parser.add_argument("--legend", help="The title of the legend.")
 
 args = parser.parse_args()
 
 # Load the data
 frame = pandas.read_csv(args.data)
+
+frame = frame.dropna()
 
 # Compute the error
 if (args.method == "absoluteError"):
@@ -39,12 +42,12 @@ if (args.split):
     for value in frame[args.split].unique():
         series = frame.query(f"{args.split} == @value")
 
-        n, bins, patches = pyplot.hist(series.difference, cumulative=True, density=1, bins=100, histtype="step", linewidth=2, label=value)
+        n, bins, patches = pyplot.hist(series.difference, cumulative=True, density=True, bins=100, histtype="step", linewidth=1, label=value)
 
         # Remove the right line that is added at the end of the histogram
         patches[0].set_xy(patches[0].get_xy()[:-1])
 else:
-    n, bins, patches = pyplot.hist(frame.difference, cumulative=True, density=1, bins=100, histtype="step", linewidth=2)
+    n, bins, patches = pyplot.hist(frame.difference, cumulative=True, density=True, bins=100, histtype="step", linewidth=1)
 
     # Remove the right line that is added at the end of the histogram
     patches[0].set_xy(patches[0].get_xy()[:-1])
@@ -63,9 +66,9 @@ if (args.xstep):
     pyplot.gca().xaxis.set_major_locator(ticker.MultipleLocator(args.xstep))
 
 pyplot.ylabel("Cumulative Probability")
-pyplot.yticks(numpy.arange(1.1, step=0.2))
+pyplot.yticks(numpy.arange(0, 1.1, step=0.2))
 
 if args.split:
-    pyplot.legend()
+    pyplot.legend(title=args.legend, bbox_to_anchor=(1, 1), loc="upper left", prop={"size": 8}, title_fontsize=8)
 
 pyplot.savefig(args.figure, bbox_inches="tight")
