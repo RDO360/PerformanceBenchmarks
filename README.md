@@ -60,7 +60,7 @@ For usage, see each script in the `analysis` directory.
 
 ## Citation
 
-**[Redacted]**
+To be added after acceptance.
 
 ## References
 
